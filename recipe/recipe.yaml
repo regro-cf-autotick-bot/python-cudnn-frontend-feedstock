@@ -1,8 +1,8 @@
 schema_version: 1
 
 context:
-  build_number: 1
-  version: "1.28.0"
+  build_number: 0
+  version: 1.29.0
 
 package:
   name: python-cudnn-frontend
@@ -10,15 +10,15 @@ package:
 
 source:
   url: https://github.com/NVIDIA/cudnn-frontend/archive/v${{ version }}.tar.gz
-  sha256: c4c2be237f282d67abee8141b321eee2930464f8a7b3cecb3c3c59e431afa37f
+  sha256: ef76ffd1cb9efd9b2f56e652c98bd000e0f59d1995b602c4d6408281f0e27fdc
 
 build:
   number: ${{ build_number }}
   string: cuda${{ cuda_compiler_version | replace('.', '') }}_py${{ python | version_to_buildstring }}_h${{ hash }}_${{ build_number }}
-  skip: cuda_compiler_version in (undefined, "None") or (not linux)
+  skip: match(python, '>=3.15') or cuda_compiler_version in (undefined, "None") or (not linux)
   script:
     env:
-      CUDNN_FRONTEND_LOG_INFO: "1"
+      CUDNN_FRONTEND_LOG_INFO: '1'
     content:
       - ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
@@ -29,38 +29,48 @@ requirements:
     - ${{ compiler('cuda') }}
     - ${{ stdlib("c") }}
     - cmake >=3.18
+    - cuda-nvrtc-dev
     - make
     - ninja >=1.11.1.1
   host:
-    - cuda-nvrtc-dev
     - cudnn
     - pip
     - pybind11 >=2.13,<3
     - python
     - setuptools >=64
   run:
+    - apache-tvm-ffi >=0.1.11
     - python
-
+    - nvidia-cutlass-dsl >=4.6.2
 tests:
   - python:
       imports:
         - cudnn
-        # - cudnn.gemm_swiglu
-        # - cudnn.gemm_amax
-        # - cudnn.grouped_gemm
-        # - cudnn.grouped_gemm.grouped_gemm_swiglu
+        - cudnn.block_sparse_attention
+        - cudnn.experimental.ops
+        - cudnn.gemm
+        # - cudnn.gnn
+        # - cudnn.gnn.agg_simple
+        - cudnn.hstu
+        # - cudnn.hstu_attention
+        # - cudnn.jax
+        - cudnn.linear_attention
+        # - cudnn.fla
         # - cudnn.native_sparse_attention
         # - cudnn.native_sparse_attention.compression
         # - cudnn.native_sparse_attention.selection
         # - cudnn.native_sparse_attention.sliding_window_attention
         # - cudnn.native_sparse_attention.top_k
+        - cudnn.ops
+        # - cudnn.ops.causal_conv1d
+        # - cudnn.ops.fft_causal_conv1d
+        - cudnn.sdpa
       pip_check: true
   - requirements:
       run:
         - pip
-        # - nvidia-cutlass-dsl==4.3.5
     script:
-      - python -c "import cudnn; assert cudnn.backend_version() >= 91000, cudnn.backend_version()"
+      - python -c "import cudnn; assert cudnn.backend_version() >= 92600, cudnn.backend_version()"
   - package_contents:
       strict: false
       site_packages:
