@@ -2,7 +2,7 @@ schema_version: 1
 
 context:
   build_number: 0
-  version: 1.31.0
+  version: 1.33.0
 
 package:
   name: python-cudnn-frontend
@@ -10,7 +10,7 @@ package:
 
 source:
   url: https://github.com/NVIDIA/cudnn-frontend/archive/v${{ version }}.tar.gz
-  sha256: 130f3e98e3f07defd60bf39b250ae7d96c61ca99443782ce77fd470964fbd899
+  sha256: 135a2c56c91dc6b1eca6a75369a0c8c8a3747da95c099be31b4f2a9788f91ce6
 
 build:
   number: ${{ build_number }}
@@ -41,7 +41,7 @@ requirements:
   run:
     - apache-tvm-ffi >=0.1.11
     - python
-    - nvidia-cutlass-dsl >=4.6.2
+    - nvidia-cutlass-dsl >=4.8.0
 tests:
   - python:
       imports:
